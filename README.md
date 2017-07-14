@@ -5,7 +5,7 @@
 I was using Node.js for this homework just because that's what I'm going to do on a project.
 But as you request was to create a code that you can run in browser, I was not using anything node related in the photoRepository script.
 
-To start use - create new instance of PhotoRepository object.
+To start - create new instance of PhotoRepository object.
 
 - add(photo) - add photo into storage. photo object has to have 'url' and 'description' attributes. Id of freshly created entry will be return
 
@@ -24,15 +24,15 @@ To start use - create new instance of PhotoRepository object.
 
 Questions to figure out:
 
-[1] What is the common structure for node project? Where do tests live?
+1) How to make some fields private? Like for internal data structure or for some functions
 
-[2] How to make IntelliJ better support testing? Example
+2) What is the common structure for node project? Where do tests live?
+
+3) How to make IntelliJ better support testing? Example
     - jumping from file to the corresponding tests file (shift + ctr + T for java)
     - running one specific test at the time (right now I can only run the entire test file)
 
-
-[3] There are a lots of weird warnings in Intellij like
+4) There are a lots of weird warnings in Intellij like
     - unterminated statement for 'use strict' line
     - unresolvable variable "to" in test
 
-[4] How to make some fields private? Like for internal data structure or for some functions
