@@ -27,20 +27,32 @@ class Photo {
 
 }
 
-class ImageRepository {
+class PhotoRepository {
+
     constructor() {
         this.idToPhotoMap = {};
+        this.searchIndex = {};
 
+        // this my attempt to make internal datastaructures to not stick out that easy.
+        // But I am aware that they are still kind of public anyway...
         Object.defineProperty(this, 'idToPhotoMap', {
             enumerable: false,
             writable: true
         });
+
+        Object.defineProperty(this, 'searchIndex', {
+            enumerable: false,
+            writable: true
+        });
+
+        this.tokenizer = /\W+/;
     }
 
     add(photo) {
         assert(photo, "Cannot add empty photo object");
         assert(photo.url, 'Url has to be provided in photo object');
         assert(photo.description, 'Description has to be provided in image description');
+
         const numberOfStoredImages = Object.keys(this.idToPhotoMap).length;
         let newPhotoId = numberOfStoredImages + 1;
         log(`storing photo object [${JSON.stringify(photo)}] with id [${newPhotoId}]\n`);
@@ -49,11 +61,30 @@ class ImageRepository {
             .withDescription(photo.description)
             .withUrl(photo.url);
 
+        //updating search index.
+        // TODO - this must be extracted into something like a private function...
+        const tokens = photo.description.toLowerCase().split(this.tokenizer);
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            log(`Adding photo with id [${newPhotoId}] into list for keyword [${token}]`);
+            if (this.searchIndex[token]) {
+                this.searchIndex[token].push(newPhotoId);
+            } else {
+                this.searchIndex[token] = [newPhotoId];
+            }
+        }
+
+
+
         return newPhotoId;
     }
 
     get(photoId) {
         assert(photoId, 'Cannot get photo for empty id');
+        assert(typeof photoId === 'number' || typeof photoId === 'string',
+            "Only accept number or string as photo id. (I know it's JS and the functions are the first-class, " +
+            "but still, fuck it )");
+
         log(`Retrieving photo object for id [${photoId}]`);
         let result = this.idToPhotoMap[photoId];
         // awesome - I got all three brackets )}] in the row! :D
@@ -102,11 +133,22 @@ class ImageRepository {
     };
 
     find(keyword) {
-        throw 'Not implemented';
+        assert(keyword, "Cannot search with empty keyword");
+
+        const normalizedKeyword = keyword.toLowerCase();
+
+        if (this.searchIndex[normalizedKeyword]) {
+            const result = this.searchIndex[normalizedKeyword];
+            log(`for keyword [${normalizedKeyword}] found photos with ids [${result}]`);
+            return result;
+        } else {
+            log(`No photos found for keyword [${normalizedKeyword}]`);
+            return [];
+        }
     };
 }
 
 
-module.exports = ImageRepository;
+module.exports = PhotoRepository;
 
 

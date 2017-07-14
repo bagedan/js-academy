@@ -33,7 +33,7 @@ describe('Testing image repo', () => {
             expect(testee.edit).to.be.a('function')
         });
         it('Should have find method', () => {
-            expect(ImageRepository.find).to.be.a('function')
+            expect(testee.find).to.be.a('function')
         });
     });
 
@@ -92,16 +92,6 @@ describe('Testing image repo', () => {
     });
 
     describe('Remove logic', () => {
-        const imageId = 1;
-
-        before(function addObject() {
-            testee.add(
-                {
-                    description: 'My Cat',
-                    url: 'http://mysite.com/cat'
-                }
-            )
-        });
 
         it('Should throw if id is null', () => {
 
@@ -132,32 +122,22 @@ describe('Testing image repo', () => {
 
         it('Should remove photo by id', () => {
 
-            expect(testee.get(imageId)).to.be.an('object');
+            expect(testee.get(testPhotoId)).to.be.an('object');
 
-            testee.remove(imageId);
+            testee.remove(testPhotoId);
 
-            expect(testee.get(imageId)).to.be.a('null');
+            expect(testee.get(testPhotoId)).to.be.a('null');
         });
 
         it('Should do nothing if trying to remove not existing photo', () => {
 
             expect(testee.get('some-not-existing-id')).to.be.a('null');
 
-            testee.remove(imageId);
+            testee.remove(testPhotoId);
         });
     });
 
     describe('Edit logic', () => {
-        const imageId = 1;
-
-        beforeEach(function addObject() {
-            testee.add(
-                {
-                    description: 'My Cat',
-                    url: 'http://mysite.com/cat'
-                }
-            )
-        });
 
         it('Should throw if object is empty', () => {
 
@@ -193,15 +173,15 @@ describe('Testing image repo', () => {
             const newDescription = 'My Dog';
             testee.edit(
                 {
-                    id: imageId,
+                    id: testPhotoId,
                     description: newDescription
                 }
             );
 
-            const updatedPhoto = testee.get(imageId);
+            const updatedPhoto = testee.get(testPhotoId);
 
             expect(updatedPhoto.url).to.be.equal('http://mysite.com/cat');
-            expect(updatedPhoto.id).to.be.equal(imageId);
+            expect(updatedPhoto.id).to.be.equal(testPhotoId);
             expect(updatedPhoto.description).to.be.equal(newDescription);
         });
 
@@ -209,17 +189,57 @@ describe('Testing image repo', () => {
             const newUrl = 'http://mysite.com/dog';
             testee.edit(
                 {
-                    id: imageId,
+                    id: testPhotoId,
                     url: newUrl
                 }
             );
 
-            const updatedPhoto = testee.get(imageId);
+            const updatedPhoto = testee.get(testPhotoId);
 
             expect(updatedPhoto.url).to.be.equal(newUrl);
-            expect(updatedPhoto.id).to.be.equal(imageId);
+            expect(updatedPhoto.id).to.be.equal(testPhotoId);
             expect(updatedPhoto.description).to.be.equal('My Cat');
         })
     })
 
+    describe('Find logic', () => {
+        let myCatId, myDogId, myDoggyId;
+
+        beforeEach(function addObjects() {
+            testee = new PhotoRepository();
+
+            myCatId = testee.add(
+                {
+                    description: 'My Cat',
+                    url: 'http://mysite.com/cat'
+                }
+            );
+            myDogId = testee.add(
+                {
+                    description: 'My Dog',
+                    url: 'http://mysite.com/cat'
+                }
+            );
+            myDoggyId = testee.add(
+                {
+                    description: 'My doggy, catty',
+                    url: 'http://mysite.com/cat'
+                }
+            );
+        });
+
+        it('Should throw if keyword is empty', () => {
+
+            expect(testee.find).to.throw(Error);
+
+        });
+
+        it('Should find by exact match regardless of the case', () => {
+            expect(testee.find(`Dog`)).have.length(1).and.contain(myDogId);
+            expect(testee.find(`dOg`)).have.length(1).and.contain(myDogId);
+            expect(testee.find(`dOggY`)).have.length(1).and.contain(myDoggyId);
+            expect(testee.find(`my`)).have.length(3).and.contain(myDogId, myCatId, myDoggyId);
+        });
+
+    })
 });
